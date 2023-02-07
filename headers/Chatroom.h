@@ -12,7 +12,7 @@ QT_END_NAMESPACE
 class Chatroom : public QMainWindow {
     Q_OBJECT
 public:
-    Chatroom(QString address, int port, QWidget *parent = nullptr);
+    Chatroom(QString address, int port, QString username, QWidget *parent = nullptr);
     ~Chatroom();
 
 private:

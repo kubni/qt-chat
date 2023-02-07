@@ -25,12 +25,12 @@ void MainMenu::onConnectButtonClick()
     ui->btnConnect->setEnabled(false);
 
     // Parse the address and the port
-    QString address = ui->teAddress->toPlainText().trimmed();
-    int port = ui->tePort->toPlainText().trimmed().toInt();
-
+    QString address = ui->leAddress->text().trimmed();
+    int port = ui->lePort->text().trimmed().toInt();
+    QString username = ui->leUsername->text().trimmed();
     // Show the chatroom
     this->hide();
-    m_pChatroom = new Chatroom(address, port);
+    m_pChatroom = new Chatroom(address, port, username);
 }
 
 

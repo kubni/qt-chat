@@ -8,10 +8,11 @@
 #include <iostream>
 #include <QMessageBox>
 
-Chatroom::Chatroom(QString address, int port, QWidget *parent)
+Chatroom::Chatroom(QString address, int port, QString username, QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::Chatroom),
-    m_pTcpSocket(new QTcpSocket(this))
+    m_pTcpSocket(new QTcpSocket(this)),
+    m_myUsername(username)
 {
     ui->setupUi(this);
     setupConnections();
@@ -142,7 +143,6 @@ void Chatroom::onDataIncoming()
 
 void Chatroom::onMessageSubmit()
 {
-
     QString currentTime = "[" + QDateTime::currentDateTime().toString("hh:mm:ss") + "] ";
     m_currentMessage = currentTime + m_myUsername + ": " + ui->teMessageInput->toPlainText();
 
