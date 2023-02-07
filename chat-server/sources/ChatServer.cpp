@@ -1,4 +1,5 @@
 #include "headers/ChatServer.h"
+#include "headers/ClientThread.h"
 
 #include <iostream>
 #include <random>
@@ -9,64 +10,60 @@
 #include <QTimer>
 
 ChatServer::ChatServer(QObject *parent)
-    : QObject(parent),
-    m_pServer(new QTcpServer(this))
+    : QTcpServer(parent)
 {
-    connect(m_pServer, &QTcpServer::newConnection, this, &ChatServer::onNewConnection);
+//    connect(m_pServer, &QTcpServer::newConnection, this, &ChatServer::onNewConnection);
 }
 
-ChatServer::~ChatServer() {
-    delete m_pServer;
-}
-
-
-bool ChatServer::listen(const QHostAddress &ip, quint16 port)
+void ChatServer::incomingConnection(qintptr socketDescriptor)
 {
-    std::cout << "The server is listening at port..." << port << std::endl;
-    return m_pServer->listen(ip, port);
+   std::cout << "We have a new connection! Client with socketDescriptor " << socketDescriptor << std::endl;
+   ClientThread *thread = new ClientThread(socketDescriptor, this);
+   connect(thread, &ClientThread::finished, thread, &ClientThread::deleteLater);
+   thread->start();
 }
 
 void ChatServer:: onNewConnection()
 {
-    while(m_pServer->hasPendingConnections())
-    {
-        std::cout << "We have a new connection!" << std::endl;
-        QTcpSocket *clientSocket = m_pServer->nextPendingConnection();
-        connect(clientSocket, &QIODevice::readyRead, this, &ChatServer::onDataIncoming);
-        connect(this, &ChatServer::dataReceived, this, &ChatServer::onDataReceived, Qt::UniqueConnection);
-        connect(clientSocket, &QAbstractSocket::disconnected, this, &ChatServer::onClientDisconnect);
+//    while(m_pServer->hasPendingConnections())
+//    {
+//        std::cout << "We have a new connection!" << std::endl;
+//        QTcpSocket *clientSocket = m_pServer->nextPendingConnection();
+//        connect(clientSocket, &QIODevice::readyRead, this, &ChatServer::onDataIncoming);
+//        connect(this, &ChatServer::dataReceived, this, &ChatServer::onDataReceived, Qt::UniqueConnection);
+//        connect(clientSocket, &QAbstractSocket::disconnected, this, &ChatServer::onClientDisconnect);
 
-        // Add the client to the vector of clients:
-        m_clients[clientSocket] = ++m_numOfClients;
+//        // Add the client to the vector of clients:
+//        m_clients[clientSocket] = ++m_numOfClients;
 
-        /* Initialize  the QHash map fields with default values.
-         * This is used when  we send data to ensure everything goes through. */
-        QByteArray *pBuffer = new QByteArray();
-        qint32 *pSize = new qint32(0);
-        m_buffers.insert(clientSocket, pBuffer);
-        m_sizes.insert(clientSocket, pSize);
-
-
-        // Tell everyone the new client's ID and username
-        qint32 clientID = m_clients[clientSocket];
-        QString clientUsername = QString::fromStdString("CLIENT_" + std::to_string(clientID));
-
-        // Work in progress
-        m_onlineUsers.push_back(clientUsername);
-        for(std::pair<QTcpSocket*, int> clientSocket : m_clients)
-        {
-            std::cout << "Id in loop: " << clientSocket.second << std::endl;
+//        /* Initialize  the QHash map fields with default values.
+//         * This is used when  we send data to ensure everything goes through. */
+//        QByteArray *pBuffer = new QByteArray();
+//        qint32 *pSize = new qint32(0);
+//        m_buffers.insert(clientSocket, pBuffer);
+//        m_sizes.insert(clientSocket, pSize);
 
 
-            QByteArray buffer;
-            QDataStream outDataStream(&buffer, QIODevice::WriteOnly);
-            outDataStream.setVersion(QDataStream::Qt_5_15);
-            outDataStream << clientID
-                          << clientUsername
-                          << m_onlineUsers;
-            clientSocket.first->write(buffer);
-        }
-    }
+//        // Tell everyone the new client's ID and username
+//        qint32 clientID = m_clients[clientSocket];
+//        QString clientUsername = QString::fromStdString("CLIENT_" + std::to_string(clientID));
+
+//        // Work in progress
+//        m_onlineUsers.push_back(clientUsername);
+//        for(std::pair<QTcpSocket*, int> clientSocket : m_clients)
+//        {
+//            std::cout << "Id in loop: " << clientSocket.second << std::endl;
+
+
+//            QByteArray buffer;
+//            QDataStream outDataStream(&buffer, QIODevice::WriteOnly);
+//            outDataStream.setVersion(QDataStream::Qt_5_15);
+//            outDataStream << clientID
+//                          << clientUsername
+//                          << m_onlineUsers;
+//            clientSocket.first->write(buffer);
+//        }
+//    }
 }
 
 void ChatServer::onClientDisconnect()

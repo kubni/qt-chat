@@ -11,7 +11,6 @@ QT_END_NAMESPACE
 
 class Chatroom : public QMainWindow {
     Q_OBJECT
-    using DESERIALIZATION_MEMBER_FUNCTION_POINTER = void(Chatroom::*)(QDataStream &);
 public:
     Chatroom(QString address, int port, QWidget *parent = nullptr);
     ~Chatroom();

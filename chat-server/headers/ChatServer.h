@@ -1,21 +1,20 @@
 #ifndef CHATSERVER_H
 #define CHATSERVER_H
 
-#include <QObject>
 #include <QTcpServer>
 #include <QHostAddress>
 #include <QDataStream>
 #include <map>
 
-class ChatServer : public QObject {
+class ChatServer : public QTcpServer {
     Q_OBJECT
 
 public:
-    ChatServer(QObject  *parent = nullptr);
-    ~ChatServer();
-    bool listen(const QHostAddress &ip = QHostAddress::Any, quint16 port = 0);
+    ChatServer(QObject *parent = nullptr);
+protected:
+    void incomingConnection(qintptr socketDescriptor) override;
+
 private:
-    QTcpServer *m_pServer = nullptr;
     std::map<QTcpSocket *, int> m_clients;
     int m_numOfClients = 0; // static?
     QVector<QString> m_onlineUsers;

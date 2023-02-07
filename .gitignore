@@ -3,7 +3,7 @@
 
 ./qt-chat.pro.user 
 ./chat-server/chat-server.pro.user
-./build-chat-server-Desktop-Debug
+./build-chat-server-Desktop-Debug/*
 
 *~
 *.autosave

@@ -5,11 +5,13 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++17
 
 SOURCES += \
+    sources/ClientThread.cpp \
     sources/main.cpp \
     sources/ChatServer.cpp
 
 HEADERS += \
-    headers/ChatServer.h
+    headers/ChatServer.h \
+    headers/ClientThread.h
 
 FORMS +=
 

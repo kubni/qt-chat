@@ -19,6 +19,7 @@ Chatroom::Chatroom(QString address, int port, QWidget *parent)
     // Install an event filter on our text edit so we can react to ENTER key press with Chatroom's eventFilter()
     ui->teMessageInput->installEventFilter(this);
     ui->teMessageInput->setPlaceholderText("Type something...");
+
     // Setup data stream
     m_inDataStream.setDevice(m_pTcpSocket);
     m_inDataStream.setVersion(QDataStream::Qt_5_15);
@@ -26,6 +27,9 @@ Chatroom::Chatroom(QString address, int port, QWidget *parent)
     // Connect to the server
     m_pTcpSocket->abort();
     m_pTcpSocket->connectToHost(address, port);
+
+    // Show UI
+    this->show();
 }
 
 Chatroom::~Chatroom()
@@ -51,7 +55,7 @@ bool Chatroom::eventFilter(QObject *obj, QEvent *event)
             return true;
         }
     }
-    else if (event->type() == QEvent::KeyRelease )
+    else if (event->type() == QEvent::KeyRelease)
     {
        m_pressedKeys -= (static_cast<QKeyEvent *>(event)->key());
     }
@@ -99,6 +103,8 @@ void Chatroom::onDataIncoming()
     m_inDataStream.startTransaction();
 
     // We can read the data here from the stream
+    m_inDataStream >> m_currentMessage;
+    qDebug() << m_currentMessage;
 
     if(!m_inDataStream.commitTransaction())
         return;
@@ -119,5 +125,4 @@ void Chatroom::onMessageSubmit()
     outDataStream << m_myUsername
                   << m_currentMessage;
     sendDataToServer(buffer);
-//    blockingLoop.exec();
 }
