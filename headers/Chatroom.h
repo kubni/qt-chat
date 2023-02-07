@@ -27,6 +27,7 @@ private:
     QSet<int> m_pressedKeys;
 
     void setupConnections();
+    void displayError(QAbstractSocket::SocketError socketError);
     bool sendDataToServer(QByteArray &dataBuffer);
 
     QByteArray QInt32ToQByteArray(qint32 source);

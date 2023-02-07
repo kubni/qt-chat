@@ -6,7 +6,7 @@
 #include <QDateTime>
 #include <QTimer>
 #include <iostream>
-
+#include <QMessageBox>
 
 Chatroom::Chatroom(QString address, int port, QWidget *parent)
     : QMainWindow(parent),
@@ -65,9 +65,38 @@ bool Chatroom::eventFilter(QObject *obj, QEvent *event)
 
 void Chatroom::setupConnections()
 {
+    connect(m_pTcpSocket, &QAbstractSocket::errorOccurred, this, &Chatroom::displayError);
     connect(m_pTcpSocket, &QIODevice::readyRead, this, &Chatroom::onDataIncoming);
     connect(this, &Chatroom::messageSubmitted, this, &Chatroom::onMessageSubmit);
 }
+
+void Chatroom::displayError(QAbstractSocket::SocketError socketError)
+{
+    switch (socketError) {
+    case QAbstractSocket::RemoteHostClosedError:
+        QMessageBox::information(this, tr("Client"),
+                                 tr("The host has closed the connection."));
+        break;
+    case QAbstractSocket::HostNotFoundError:
+        QMessageBox::information(this, tr("Client"),
+                                 tr("The host was not found. Please check the "
+                                    "host name and port settings."));
+        break;
+    case QAbstractSocket::ConnectionRefusedError:
+        QMessageBox::information(this, tr("Client"),
+                                 tr("The connection was refused by the peer. "
+                                    "Make sure the fortune server is running, "
+                                    "and check that the host name and port "
+                                    "settings are correct."));
+        break;
+    default:
+        QMessageBox::information(this, tr("Client"),
+                                 tr("The following error occurred: %1.")
+                                 .arg(m_pTcpSocket->errorString()));
+    }
+}
+
+
 
 bool Chatroom::sendDataToServer(QByteArray &data)
 {
