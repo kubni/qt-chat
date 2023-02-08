@@ -1,6 +1,8 @@
 #ifndef CHATSERVER_H
 #define CHATSERVER_H
 
+#include "headers/ClientThread.h"
+
 #include <QTcpServer>
 #include <QHostAddress>
 #include <QDataStream>
@@ -15,7 +17,7 @@ protected:
     void incomingConnection(qintptr socketDescriptor) override;
 
 private:
-    std::map<QTcpSocket *, int> m_clients;
+    QVector<ClientThread *> m_clients;
     int m_numOfClients = 0; // static?
     QVector<QString> m_onlineUsers;
 
@@ -34,6 +36,7 @@ private slots:
 
 signals:
     void dataReceived(QByteArray &data, QTcpSocket *pSenderSocket); // const?
+    void newMessage(QByteArray &data);
 
 
 

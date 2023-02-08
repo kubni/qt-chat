@@ -9,14 +9,18 @@
 class ClientThread : public QThread {
     Q_OBJECT
 public:
-    ClientThread(int socketDescriptor, QObject *parent);
+    ClientThread(int socketDescriptor, QObject *parent = nullptr);
 protected:
     void run() override;
 private:
     int m_socketDescriptor;
-
+    QTcpSocket *m_pTcpSocket;
+public slots:
+    void onNewMessage(QByteArray &data);
 signals:
     void error(QTcpSocket::SocketError socketError);
+
+
 };
 
 #endif // CLIENTTHREAD_H

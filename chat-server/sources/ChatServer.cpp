@@ -1,5 +1,4 @@
 #include "headers/ChatServer.h"
-#include "headers/ClientThread.h"
 
 #include <iostream>
 #include <random>
@@ -12,7 +11,7 @@
 ChatServer::ChatServer(QObject *parent)
     : QTcpServer(parent)
 {
-//    connect(m_pServer, &QTcpServer::newConnection, this, &ChatServer::onNewConnection);
+    connect(this, &ChatServer::dataReceived, this, &ChatServer::onDataReceived);
 }
 
 void ChatServer::incomingConnection(qintptr socketDescriptor)
@@ -20,6 +19,12 @@ void ChatServer::incomingConnection(qintptr socketDescriptor)
    std::cout << "We have a new connection! Client with socketDescriptor " << socketDescriptor << std::endl;
    ClientThread *thread = new ClientThread(socketDescriptor, this);
    connect(thread, &ClientThread::finished, thread, &ClientThread::deleteLater);
+   connect(this, &ChatServer::newMessage, thread, &ClientThread::onNewMessage);
+
+   // Add the client to the vector of clients:
+   m_clients.push_back(thread);
+
+
    thread->start();
 }
 
@@ -68,74 +73,65 @@ void ChatServer:: onNewConnection()
 
 void ChatServer::onClientDisconnect()
 {
-    std::cout << "We are in onDisconnect" << std::endl;
-    QTcpSocket *socket = static_cast<QTcpSocket*>(sender()); 
-    QByteArray *buffer = m_buffers.value(socket);
-    qint32 *s = m_sizes.value(socket);
-
-    m_clients.erase(socket);
-    m_numOfClients--;
-
-    socket->deleteLater();
-    delete buffer;
-    delete s;
+    std::cout << "We are in onDisconnect but we do nothing here yet" << std::endl;
 }
 
 
 void ChatServer::onDataIncoming() {
     std::cout << "We are in data incoming slot" << std::endl;
 
-    QTcpSocket *pSocket = static_cast<QTcpSocket*>(sender());
-    std::cout << "The one who sent data is client with id " << m_clients[pSocket] << std::endl;
+//    QTcpSocket *pSocket = static_cast<QTcpSocket*>(sender());
 
-    QByteArray *pBuffer = m_buffers.value(pSocket);
-    qint32 *s = m_sizes.value(pSocket);
-    qint32 size = *s;
 
-    std::cout << "Size: " << size << std::endl;
+//    QByteArray *pBuffer = m_buffers.value(pSocket);
+//    qint32 *s = m_sizes.value(pSocket);
+//    qint32 size = *s;
 
-    // pBuffer = size | data
-    while(pSocket->bytesAvailable() > 0) // Check if there are any bytes awaiting to be read
-    {
-        // Append the byte array returned by readAll to our buffer
-        pBuffer->append(pSocket->readAll());
+//    std::cout << "Size: " << size << std::endl;
 
-        // In this loop we ensure that we get complete data
-        while((size == 0 && pBuffer->size() >= 4) || (size > 0 && pBuffer->size() >= size)) //While we can process data, process it
-        {
-            if (size == 0 && pBuffer->size() >= 4) // If the data's size has been received completely, we store it
-            {
-                // QByteArray::mid(pos, len) returns a byte array with length `len` starting from position `pos`
-                size = QByteArrayToQInt32(pBuffer->mid(0, 4));
-                *s = size;
-                pBuffer->remove(0, 4);
-            }
+//    // pBuffer = size | data
+//    while(pSocket->bytesAvailable() > 0) // Check if there are any bytes awaiting to be read
+//    {
+//        // Append the byte array returned by readAll to our buffer
+//        pBuffer->append(pSocket->readAll());
 
-            if (size > 0 && pBuffer->size() >= size) // If the data has been received completely, we store it
-            {
-                QByteArray data = pBuffer->mid(0, size);
-                pBuffer->remove(0, size);
-                size = 0;
-                *s = size;
-                emit dataReceived(data, pSocket);
-            }
-        }
-    }
+//        // In this loop we ensure that we get complete data
+//        while((size == 0 && pBuffer->size() >= 4) || (size > 0 && pBuffer->size() >= size)) //While we can process data, process it
+//        {
+//            if (size == 0 && pBuffer->size() >= 4) // If the data's size has been received completely, we store it
+//            {
+//                // QByteArray::mid(pos, len) returns a byte array with length `len` starting from position `pos`
+//                size = QByteArrayToQInt32(pBuffer->mid(0, 4));
+//                *s = size;
+//                pBuffer->remove(0, 4);
+//            }
+
+//            if (size > 0 && pBuffer->size() >= size) // If the data has been received completely, we store it
+//            {
+//                QByteArray data = pBuffer->mid(0, size);
+//                pBuffer->remove(0, size);
+//                size = 0;
+//                *s = size;
+//                emit dataReceived(data, pSocket);
+//            }
+//        }
+//    }
 }
 
 void ChatServer::onDataReceived(QByteArray &receivedData, QTcpSocket *pSenderSocket)
 {
     // The ORIGINAL data we receive from one client needs to be relayed to the other clients too
-    for(std::pair<QTcpSocket*, int> clientSocket : m_clients)
-    {
-        std::cout << "ClientSocket id : " << clientSocket.second << std::endl;
+//    for(std::pair<QTcpSocket*, int> clientSocket : m_clients)
+//    {
+//        std::cout << "ClientSocket id : " << clientSocket.second << std::endl;
 
-        // Send the received data to all other clients
-        if(clientSocket.first != pSenderSocket)
-        {
-            clientSocket.first->write(receivedData);
-        }
-    }
+//        // Send the received data to all other clients
+//        if(clientSocket.first != pSenderSocket)
+//        {
+//            clientSocket.first->write(receivedData);
+//        }
+//    }
+    emit newMessage(receivedData);
 }
 
 qint32 ChatServer::QByteArrayToQInt32(QByteArray source)

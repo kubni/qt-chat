@@ -8,6 +8,15 @@
 #include <iostream>
 #include <QMessageBox>
 
+const std::map<QString, Chatroom::DESERIALIZATION_MEMBER_FUNCTION_POINTER> Chatroom::m_deserializationMap = {
+    {"IDENTIFICATION",                                      &Chatroom::deserializeIdentification},
+    {"NEW_CLIENT",                                          &Chatroom::deserializeNewClient},
+    {"NEW_MESSAGE",                                         &Chatroom::deserializeNewMessage}
+};
+
+
+
+
 Chatroom::Chatroom(QString address, int port, QString username, QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::Chatroom),
@@ -126,19 +135,41 @@ QByteArray Chatroom::QInt32ToQByteArray(qint32 source)
     return tmp;
 }
 
+void Chatroom::deserializeIdentification(QDataStream &deserializationStream)
+{
+    qintptr id;
+    deserializationStream >> id;
+
+    m_myID = qint32(id);
+}
+
+void Chatroom::deserializeNewClient(QDataStream &deserializationStream)
+{
+
+}
+
+void Chatroom::deserializeNewMessage(QDataStream &deserializationStream)
+{
+
+}
+
 void Chatroom::onDataIncoming()
 {
     std::cout << "In data incoming" << std::endl;
     // Wait for everything to be read
     m_inDataStream.startTransaction();
 
-    // We can read the data here from the stream
-    m_inDataStream >> m_currentMessage;
-    qDebug() << m_currentMessage;
+    /* We can read the data here from the stream
+       Depending on the header, we call the appropriate method for deserialization. */
+    QString header;
+    m_inDataStream >> header;
 
+    qDebug() << "Current header: " << header;
     if(!m_inDataStream.commitTransaction())
         return;
 
+    auto deserializationFunctionPointer = m_deserializationMap.at(header);
+    (this->*deserializationFunctionPointer)(m_inDataStream);
 }
 
 void Chatroom::onMessageSubmit()
