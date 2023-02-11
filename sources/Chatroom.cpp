@@ -5,15 +5,14 @@
 #include <QKeyEvent>
 #include <QDateTime>
 #include <QTimer>
-#include <iostream>
 #include <QMessageBox>
+#include <iostream>
+
 
 const std::map<QString, Chatroom::DESERIALIZATION_MEMBER_FUNCTION_POINTER> Chatroom::m_deserializationMap = {
     {"IDENTIFICATION",                                      &Chatroom::deserializeIdentification},
-    {"NEW_CLIENT",                                          &Chatroom::deserializeNewClient},
     {"NEW_MESSAGE",                                         &Chatroom::deserializeNewMessage}
 };
-
 
 
 
@@ -141,11 +140,6 @@ void Chatroom::deserializeIdentification(QDataStream &deserializationStream)
     m_myID = qint32(id);
 }
 
-void Chatroom::deserializeNewClient(QDataStream &deserializationStream)
-{
-
-}
-
 void Chatroom::deserializeNewMessage(QDataStream &deserializationStream)
 {
     std::cout << "We are in deserializeNewMessage";
@@ -154,7 +148,7 @@ void Chatroom::deserializeNewMessage(QDataStream &deserializationStream)
 
     qDebug() << newMessage;
 
-    ui->tbChat->append(newMessage);
+    ui->lwChat->addItem(newMessage);
 }
 
 void Chatroom::onDataIncoming()

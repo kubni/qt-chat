@@ -35,7 +35,6 @@ private:
     QByteArray QInt32ToQByteArray(qint32 source);
 
     void deserializeIdentification(QDataStream &deserializationStream);
-    void deserializeNewClient(QDataStream &deserializationStream);
     void deserializeNewMessage(QDataStream &deserializationStream);
 
 private slots:

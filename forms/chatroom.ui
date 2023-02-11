@@ -39,7 +39,7 @@
        </layout>
       </item>
       <item>
-       <widget class="QListWidget" name="listOnlineUsers">
+       <widget class="QListWidget" name="lwOnlineUsers">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -50,27 +50,27 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QTextBrowser" name="tbChat"/>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="hLayoutMessageInput" stretch="0">
+       <layout class="QHBoxLayout" name="hLayoutMessageInput" stretch="">
         <property name="spacing">
          <number>4</number>
         </property>
         <property name="rightMargin">
          <number>0</number>
         </property>
-        <item alignment="Qt::AlignTop">
-         <widget class="QTextEdit" name="teMessageInput">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>25</height>
-           </size>
-          </property>
-         </widget>
-        </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QListWidget" name="lwChat"/>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="teMessageInput">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>25</height>
+         </size>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
