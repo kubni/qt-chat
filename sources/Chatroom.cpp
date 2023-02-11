@@ -106,14 +106,12 @@ void Chatroom::displayError(QAbstractSocket::SocketError socketError)
     }
 }
 
-
-
 bool Chatroom::sendDataToServer(QByteArray &data)
 {
     if(m_pTcpSocket->state() == QAbstractSocket::ConnectedState)
     {
         // First we should send the data size so server knows how big is the incoming data
-        m_pTcpSocket->write(QInt32ToQByteArray(data.size()));
+//        m_pTcpSocket->write(QInt32ToQByteArray(data.size()));                             // TODO: For now we don't send this since we literally just send raw data to server
 
         // Then we send the actual data
         m_pTcpSocket->write(data);
@@ -150,7 +148,13 @@ void Chatroom::deserializeNewClient(QDataStream &deserializationStream)
 
 void Chatroom::deserializeNewMessage(QDataStream &deserializationStream)
 {
+    std::cout << "We are in deserializeNewMessage";
+    QString newMessage;
+    deserializationStream >> newMessage;
 
+    qDebug() << newMessage;
+
+    ui->tbChat->append(newMessage);
 }
 
 void Chatroom::onDataIncoming()
@@ -164,10 +168,11 @@ void Chatroom::onDataIncoming()
     QString header;
     m_inDataStream >> header;
 
-    qDebug() << "Current header: " << header;
+    std::cout << "Current header: " << header.toStdString() << std::endl;
     if(!m_inDataStream.commitTransaction())
         return;
 
+    qDebug() << "qdebug Header trimmed: " << header;
     auto deserializationFunctionPointer = m_deserializationMap.at(header);
     (this->*deserializationFunctionPointer)(m_inDataStream);
 }
@@ -177,12 +182,10 @@ void Chatroom::onMessageSubmit()
     QString currentTime = "[" + QDateTime::currentDateTime().toString("hh:mm:ss") + "] ";
     m_currentMessage = currentTime + m_myUsername + ": " + ui->teMessageInput->toPlainText();
 
-    ui->tbChat->append(m_currentMessage);
-
     QByteArray buffer;
     QDataStream outDataStream(&buffer, QIODevice::WriteOnly);
     outDataStream.setVersion(QDataStream::Qt_5_15);
-    outDataStream << m_myUsername
+    outDataStream << QString::fromStdString("NEW_MESSAGE")
                   << m_currentMessage;
     sendDataToServer(buffer);
 }

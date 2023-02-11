@@ -10,22 +10,18 @@
 
 ChatServer::ChatServer(QObject *parent)
     : QTcpServer(parent)
-{
-    connect(this, &ChatServer::dataReceived, this, &ChatServer::onDataReceived);
-}
+{}
 
 void ChatServer::incomingConnection(qintptr socketDescriptor)
 {
-   std::cout << "We have a new connection! Client with socketDescriptor " << socketDescriptor << std::endl;
-   ClientThread *thread = new ClientThread(socketDescriptor, this);
-   connect(thread, &ClientThread::finished, thread, &ClientThread::deleteLater);
-   connect(this, &ChatServer::newMessage, thread, &ClientThread::onNewMessage);
+    std::cout << "We have a new connection! Client with socketDescriptor " << socketDescriptor << std::endl;
 
-   // Add the client to the vector of clients:
-   m_clients.push_back(thread);
+    ClientThread *thread = new ClientThread(socketDescriptor, this);
+    connect(thread, &ClientThread::finished, thread, &ClientThread::deleteLater);
+    connect(thread, &ClientThread::newMessage, this, &ChatServer::onDataReceived, Qt::DirectConnection);
+    connect(this, &ChatServer::messageReadyToBeSentToOtherClients, thread, &ClientThread::onNewMessage, Qt::DirectConnection);
 
-
-   thread->start();
+    thread->start();
 }
 
 void ChatServer:: onNewConnection()
@@ -76,12 +72,10 @@ void ChatServer::onClientDisconnect()
     std::cout << "We are in onDisconnect but we do nothing here yet" << std::endl;
 }
 
-
 void ChatServer::onDataIncoming() {
-    std::cout << "We are in data incoming slot" << std::endl;
+//    std::cout << "We are in data incoming slot" << std::endl;
 
 //    QTcpSocket *pSocket = static_cast<QTcpSocket*>(sender());
-
 
 //    QByteArray *pBuffer = m_buffers.value(pSocket);
 //    qint32 *s = m_sizes.value(pSocket);
@@ -112,26 +106,18 @@ void ChatServer::onDataIncoming() {
 //                pBuffer->remove(0, size);
 //                size = 0;
 //                *s = size;
-//                emit dataReceived(data, pSocket);
+
+//                qDebug() << "EMITTING DATARECEIVED...";
+
+//                emit dataReceived(data/*, pSocket*/);
 //            }
 //        }
 //    }
 }
 
-void ChatServer::onDataReceived(QByteArray &receivedData, QTcpSocket *pSenderSocket)
+void ChatServer::onDataReceived(QByteArray receivedData)
 {
-    // The ORIGINAL data we receive from one client needs to be relayed to the other clients too
-//    for(std::pair<QTcpSocket*, int> clientSocket : m_clients)
-//    {
-//        std::cout << "ClientSocket id : " << clientSocket.second << std::endl;
-
-//        // Send the received data to all other clients
-//        if(clientSocket.first != pSenderSocket)
-//        {
-//            clientSocket.first->write(receivedData);
-//        }
-//    }
-    emit newMessage(receivedData);
+    emit messageReadyToBeSentToOtherClients(receivedData);
 }
 
 qint32 ChatServer::QByteArrayToQInt32(QByteArray source)

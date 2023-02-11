@@ -15,10 +15,14 @@ protected:
 private:
     int m_socketDescriptor;
     QTcpSocket *m_pTcpSocket;
+    QVector<ClientThread *> m_clients;
 public slots:
-    void onNewMessage(QByteArray &data);
+    void onReadyRead();
+    void onNewMessage(QByteArray data);
+    void onDisconnect();
 signals:
     void error(QTcpSocket::SocketError socketError);
+    void newMessage(QByteArray data);
 
 
 };

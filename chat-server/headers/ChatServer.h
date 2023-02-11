@@ -17,7 +17,7 @@ protected:
     void incomingConnection(qintptr socketDescriptor) override;
 
 private:
-    QVector<ClientThread *> m_clients;
+    QVector<qintptr> m_clients;
     int m_numOfClients = 0; // static?
     QVector<QString> m_onlineUsers;
 
@@ -31,12 +31,13 @@ private:
 private slots:
     void onNewConnection();
     void onDataIncoming();
-    void onDataReceived(QByteArray &receivedData, QTcpSocket *pSenderSocket); // const?
+    void onDataReceived(QByteArray receivedData/*, QTcpSocket *pSenderSocket*/); // const?
     void onClientDisconnect();
 
 signals:
-    void dataReceived(QByteArray &data, QTcpSocket *pSenderSocket); // const?
-    void newMessage(QByteArray &data);
+    void dataReceived(QByteArray data/*, QTcpSocket *pSenderSocket*/); // const?
+    void messageReadyToBeSentToOtherClients(QByteArray data);
+
 
 
 

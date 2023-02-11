@@ -7,6 +7,10 @@ MainMenu::MainMenu(QWidget *parent)
 {
     ui->setupUi(this);
     setupConnections();
+
+    // TEMPORARY (FOR EASE OF TESTING)
+    ui->leAddress->setText("localhost");
+    ui->lePort->setText("8090");
 }
 
 MainMenu::~MainMenu()
@@ -28,6 +32,7 @@ void MainMenu::onConnectButtonClick()
     QString address = ui->leAddress->text().trimmed();
     int port = ui->lePort->text().trimmed().toInt();
     QString username = ui->leUsername->text().trimmed();
+
     // Show the chatroom
     this->hide();
     m_pChatroom = new Chatroom(address, port, username);

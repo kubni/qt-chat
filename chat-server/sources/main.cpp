@@ -3,6 +3,9 @@
 #include "headers/ChatServer.h"
 
 int main(int argc, char **argv) {
+
+  qRegisterMetaType<QByteArray>();
+
   QApplication app(argc, argv);
   ChatServer server;
 
