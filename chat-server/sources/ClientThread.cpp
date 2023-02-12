@@ -23,15 +23,8 @@ void ClientThread::run()
     connect(m_pTcpSocket , &QAbstractSocket::readyRead, this, &ClientThread::onReadyRead, Qt::DirectConnection);
     connect(m_pTcpSocket, &QAbstractSocket::disconnected, this, &ClientThread::onDisconnect);
 
-    QByteArray buffer;
-    QDataStream outDataStream(&buffer, QIODevice::WriteOnly);
-    outDataStream.setVersion(QDataStream::Qt_5_15);
-    outDataStream << QString::fromStdString("IDENTIFICATION")
-                  << qintptr(m_socketDescriptor);
-    m_pTcpSocket->write(buffer);
 
-    // Block the calling thread until we finish writing here
-    m_pTcpSocket->waitForBytesWritten();
+    emit newConnection(m_socketDescriptor);
 
     exec();
 }

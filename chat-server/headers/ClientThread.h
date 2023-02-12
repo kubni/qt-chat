@@ -23,6 +23,7 @@ public slots:
 signals:
     void error(QTcpSocket::SocketError socketError);
     void newMessage(QByteArray data);
+    void newConnection(qintptr newID);
 
 
 };

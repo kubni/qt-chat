@@ -29,7 +29,7 @@ private:
     qint32 QByteArrayToQInt32(QByteArray array);
 
 private slots:
-    void onNewConnection();
+    void onNewConnection(qintptr newID);
     void onDataIncoming();
     void onDataReceived(QByteArray receivedData/*, QTcpSocket *pSenderSocket*/); // const?
     void onClientDisconnect();

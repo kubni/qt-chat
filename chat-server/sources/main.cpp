@@ -5,6 +5,7 @@
 int main(int argc, char **argv) {
 
   qRegisterMetaType<QByteArray>();
+  qRegisterMetaType<qintptr>("qintptr");
 
   QApplication app(argc, argv);
   ChatServer server;

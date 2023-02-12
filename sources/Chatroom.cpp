@@ -11,6 +11,7 @@
 
 const std::map<QString, Chatroom::DESERIALIZATION_MEMBER_FUNCTION_POINTER> Chatroom::m_deserializationMap = {
     {"IDENTIFICATION",                                      &Chatroom::deserializeIdentification},
+    {"NEW_CONNECTION",                                      &Chatroom::deserializeNewConnection},
     {"NEW_MESSAGE",                                         &Chatroom::deserializeNewMessage}
 };
 
@@ -138,6 +139,18 @@ void Chatroom::deserializeIdentification(QDataStream &deserializationStream)
     deserializationStream >> id;
 
     m_myID = qint32(id);
+}
+
+void Chatroom::deserializeNewConnection(QDataStream &deserializationStream)
+{
+    qDebug() << "Deserializing new connection...";
+
+    qintptr newID;
+    deserializationStream >> newID;
+    if(m_myID == -1)
+    {
+        m_myID = newID;
+    }
 }
 
 void Chatroom::deserializeNewMessage(QDataStream &deserializationStream)
